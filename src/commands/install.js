@@ -1,63 +1,152 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import ora from 'ora';
-import chalk from 'chalk';
+const chalk = require('chalk');
+const ora = require('ora');
+const path = require('path');
+const fs = require('fs-extra');
+const { execSync } = require('child_process');
+const os = require('os');
 
-export default async function installCmd() {
-  const spinner = ora('Installing FXP globally').start();
+const INSTALL_PATHS = {
+  win32: path.join(os.homedir(), 'AppData', 'Local', 'fxp'),
+  linux: '/usr/local/bin',
+  darwin: '/usr/local/bin'
+};
 
+const BINARY_NAMES = {
+  win32: 'fxp.exe',
+  linux: 'fxp',
+  darwin: 'fxp'
+};
+
+async function installCLI() {
   try {
-    const currentExe = process.execPath;
-    const isWindows = os.platform() === 'win32';
-    
-    // Determine install location
-    const installDir = isWindows 
-      ? path.join(os.homedir(), 'AppData', 'Local', 'FXP')
-      : path.join(os.homedir(), '.local', 'bin');
-    
-    const targetExe = isWindows 
-      ? path.join(installDir, 'fxp.exe')
-      : path.join(installDir, 'fxp');
+    console.log(chalk.blue('📦 Installing FXP CLI globally...\n'));
+
+    const platform = os.platform();
+    const installPath = INSTALL_PATHS[platform];
+    const binaryName = BINARY_NAMES[platform];
+
+    if (!installPath) {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    const spinner = ora('Installing FXP CLI...').start();
+
+    // Download latest release
+    const { downloadLatestRelease } = require('../utils/download');
+    const binaryPath = await downloadLatestRelease(platform);
 
     // Create install directory
-    if (!fs.existsSync(installDir)) {
-      fs.mkdirSync(installDir, { recursive: true });
+    await fs.ensureDir(installPath);
+
+    // Copy binary to install location
+    const targetPath = path.join(installPath, binaryName);
+    await fs.copy(binaryPath, targetPath);
+
+    // Make executable on Unix systems
+    if (platform !== 'win32') {
+      await fs.chmod(targetPath, '755');
     }
 
-    // Copy current executable
-    fs.copyFileSync(currentExe, targetExe);
-    
-    // Make executable on Unix
-    if (!isWindows) {
-      fs.chmodSync(targetExe, '755');
+    // Add to PATH on Windows
+    if (platform === 'win32') {
+      try {
+        // Add to user PATH
+        const currentPath = process.env.PATH || '';
+        if (!currentPath.includes(installPath)) {
+          execSync(`setx PATH "${currentPath};${installPath}"`, { stdio: 'pipe' });
+        }
+      } catch (error) {
+        console.log(chalk.yellow('⚠️  Could not automatically add to PATH. Please add manually:'));
+        console.log(chalk.gray(`   ${installPath}`));
+      }
     }
 
-    // Update PATH (instructions)
-    spinner.succeed('FXP installed successfully!');
-    
-    console.log(chalk.green('\nInstallation complete!'));
-    console.log(chalk.gray(`Binary installed to: ${targetExe}`));
-    
-    if (isWindows) {
-      console.log(chalk.yellow('\nTo use FXP globally, add this to your PATH:'));
-      console.log(chalk.cyan(installDir));
-      console.log(chalk.gray('\nSteps:'));
-      console.log(chalk.gray('1. Press Win+R, type "sysdm.cpl", press Enter'));
-      console.log(chalk.gray('2. Go to Advanced tab → Environment Variables'));
-      console.log(chalk.gray('3. Edit PATH, add the directory above'));
-      console.log(chalk.gray('4. Restart your terminal/PowerShell'));
-    } else {
-      console.log(chalk.yellow('\nTo use FXP globally, add this to your ~/.bashrc or ~/.zshrc:'));
-      console.log(chalk.cyan(`export PATH="${installDir}:$PATH"`));
-      console.log(chalk.gray('Then run: source ~/.bashrc (or restart terminal)'));
+    // Create symlink on Unix systems
+    if (platform !== 'win32') {
+      const symlinkPath = '/usr/local/bin/fxp';
+      try {
+        if (await fs.pathExists(symlinkPath)) {
+          await fs.unlink(symlinkPath);
+        }
+        await fs.symlink(targetPath, symlinkPath);
+      } catch (error) {
+        console.log(chalk.yellow('⚠️  Could not create symlink. You may need to run with sudo:'));
+        console.log(chalk.gray(`   sudo ln -sf ${targetPath} ${symlinkPath}`));
+      }
     }
+
+    spinner.succeed('FXP CLI installed successfully!');
+
+    console.log(chalk.green('✅ Installation complete!'));
+    console.log(chalk.gray(`📁 Installed to: ${targetPath}`));
+    console.log(chalk.blue('\n🚀 Usage:'));
+    console.log(chalk.white('   fxp create my-resource'));
+    console.log(chalk.white('   fxp list'));
+    console.log(chalk.white('   fxp update'));
     
-    console.log(chalk.green('\nAfter PATH setup, you can use: fxp --help'));
-    
-  } catch (e) {
-    spinner.fail('Installation failed');
-    console.error(chalk.red('Error:'), e.message);
-    process.exitCode = 1;
+    if (platform === 'win32') {
+      console.log(chalk.yellow('\n💡 Restart your terminal to use the fxp command'));
+    }
+
+  } catch (error) {
+    console.error(chalk.red('❌ Installation failed:'), error.message);
+    process.exit(1);
   }
 }
+
+async function uninstallCLI() {
+  try {
+    console.log(chalk.blue('🗑️  Uninstalling FXP CLI...\n'));
+
+    const platform = os.platform();
+    const installPath = INSTALL_PATHS[platform];
+    const binaryName = BINARY_NAMES[platform];
+
+    if (!installPath) {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    const spinner = ora('Uninstalling FXP CLI...').start();
+
+    const targetPath = path.join(installPath, binaryName);
+    
+    // Remove binary
+    if (await fs.pathExists(targetPath)) {
+      await fs.remove(targetPath);
+    }
+
+    // Remove symlink on Unix systems
+    if (platform !== 'win32') {
+      const symlinkPath = '/usr/local/bin/fxp';
+      if (await fs.pathExists(symlinkPath)) {
+        try {
+          await fs.unlink(symlinkPath);
+        } catch (error) {
+          console.log(chalk.yellow('⚠️  Could not remove symlink. You may need to run:'));
+          console.log(chalk.gray(`   sudo rm ${symlinkPath}`));
+        }
+      }
+    }
+
+    // Remove install directory if empty
+    try {
+      const files = await fs.readdir(installPath);
+      if (files.length === 0) {
+        await fs.remove(installPath);
+      }
+    } catch (error) {
+      // Directory doesn't exist or permission issue
+    }
+
+    spinner.succeed('FXP CLI uninstalled successfully!');
+
+    console.log(chalk.green('✅ Uninstallation complete!'));
+    console.log(chalk.gray('FXP CLI has been removed from your system'));
+
+  } catch (error) {
+    console.error(chalk.red('❌ Uninstallation failed:'), error.message);
+    process.exit(1);
+  }
+}
+
+module.exports = { installCLI, uninstallCLI };

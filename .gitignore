@@ -48,6 +48,16 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
+# FXP specific
+dist/
+build/
+*.exe
+*.app
+*.dmg
+*.deb
+*.rpm
+.ai/
+
 # Optional npm cache directory
 .npm
 

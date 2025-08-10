@@ -1,0 +1,6 @@
+{
+  "command_usage": "Usage: /%s [args]",
+  "command_executed": "Command executed successfully",
+  "error_occurred": "An error occurred",
+  "success": "Success!"
+}

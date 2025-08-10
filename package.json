@@ -1,52 +1,73 @@
 {
-  "name": "fxp",
-  "version": "0.1.0",
-  "description": "FXP by Talbergh — CLI for FiveM modders to scaffold and export resources/projects.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Talbergh/fxp.git"
-  },
-  "homepage": "https://github.com/Talbergh/fxp",
-  "bugs": {
-    "url": "https://github.com/Talbergh/fxp/issues"
-  },
-  "bin": {
-    "fxp": "bin/fxp.js"
-  },
-  "type": "module",
+  "name": "fxp-cli",
+  "version": "1.0.0",
+  "description": "CLI Tool for FiveM & RedM Modders - Resource Creation and Management",
   "main": "src/index.js",
-  "engines": {
-    "node": ">=18"
+  "bin": {
+    "fxp": "./src/index.js"
   },
   "scripts": {
-    "start": "node bin/fxp.js",
-    "dev": "node --enable-source-maps bin/fxp.js --help",
-    "build": "node scripts/build.js",
-    "build:standalone": "node scripts/build.js",
-    "build:dev": "node scripts/build.js --dev",
-    "release": "node scripts/release.js",
-    "clean": "node scripts/clean.js",
-    "test": "node scripts/test.js"
-  },
-  "author": "Talbergh",
-  "license": "MIT",
-  "dependencies": {
-    "archiver": "^6.0.2",
-    "chalk": "^5.3.0",
-    "commander": "^12.1.0",
-    "inquirer": "^9.3.7",
-    "ora": "^8.0.1"
-  },
-  "devDependencies": {
-    "pkg": "^5.8.1"
+    "start": "node src/index.js",
+    "test": "jest",
+    "build": "npm run build:win && npm run build:linux",
+    "build:win": "pkg . --target node18-win-x64 --output dist/fxp-win.exe",
+    "build:linux": "pkg . --target node18-linux-x64 --output dist/fxp-linux",
+    "dev": "node src/index.js",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write src/**/*.js"
   },
   "pkg": {
-    "scripts": ["bin/fxp.js", "src/**/*.js"],
-    "assets": ["templates/**"],
-    "targets": [
-      "node18-win-x64",
-      "node18-linux-x64"
+    "assets": [
+      "templates/**/*",
+      "data/**/*",
+      "node_modules/figlet/fonts/**/*"
     ],
     "outputPath": "dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/talbergh/fxp.git"
+  },
+  "keywords": [
+    "fivem",
+    "redm",
+    "cli",
+    "modding",
+    "resource",
+    "template",
+    "generator"
+  ],
+  "author": "talbergh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/talbergh/fxp/issues"
+  },
+  "homepage": "https://github.com/talbergh/fxp#readme",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "inquirer": "^8.2.6",
+    "chalk": "^4.1.2",
+    "figlet": "^1.6.0",
+    "fs-extra": "^11.1.1",
+    "axios": "^0.27.2",
+    "semver": "^7.5.4",
+    "ora": "^5.4.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "prettier": "^3.0.2",
+    "jest": "^29.6.4",
+    "pkg": "^5.8.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov"],
+    "testMatch": ["**/tests/**/*.test.js"]
   }
 }

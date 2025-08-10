@@ -1,110 +1,113 @@
-import { Command } from 'commander';
-import inquirer from 'inquirer';
-import chalk from 'chalk';
-import { createRequire } from 'module';
-import path from 'node:path';
-import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
+#!/usr/bin/env node
 
-import initCmd from './commands/init.js';
-import createCmd from './commands/create.js';
-import exportCmd from './commands/export.js';
-import installCmd from './commands/install.js';
-import uninstallCmd from './commands/uninstall.js';
-import { checkForUpdates } from '../scripts/update.js';
+const { program } = require('commander');
+const chalk = require('chalk');
+const figlet = require('figlet');
+const { createResource } = require('./commands/create');
+const { installCLI, uninstallCLI } = require('./commands/install');
+const { updateCLI } = require('./commands/update');
+const { checkVersion } = require('./utils/version');
+const { showHelp } = require('./commands/help');
+const { listTemplates } = require('./commands/list');
 
-const require = createRequire(import.meta.url);
+// Package info
 const pkg = require('../package.json');
 
-export default async function main(argv = process.argv) {
-  const program = new Command();
+// CLI Header
+function showHeader() {
+  console.log(
+    chalk.cyan(
+      figlet.textSync('FXP', {
+        font: 'ANSI Shadow',
+        horizontalLayout: 'default',
+        verticalLayout: 'default'
+      })
+    )
+  );
+  console.log(chalk.gray(`v${pkg.version} - FiveM & RedM Resource Generator`));
+  console.log(chalk.gray(`Author: ${pkg.author}`));
+  console.log('');
+}
+
+// Main CLI Setup
+async function main() {
+  // Check for updates on startup (non-blocking)
+  checkVersion().catch(() => {}); // Silent fail
+
   program
     .name('fxp')
-    .description('FXP by Talbergh — CLI for FiveM modders to scaffold & export resources')
-    .version(pkg.version);
+    .description('CLI Tool for FiveM & RedM Modders')
+    .version(pkg.version)
+    .option('-v, --verbose', 'enable verbose logging')
+    .option('--no-header', 'skip header display');
+
+  // Show header by default
+  if (!program.opts().noHeader) {
+    showHeader();
+  }
+
+  // Commands
+  program
+    .command('create [name]')
+    .description('Create a new FiveM/RedM resource')
+    .option('-t, --template <type>', 'template type (basic, esx, qb, redm, etc.)')
+    .option('-f, --framework <framework>', 'framework (esx, qb-core, standalone)')
+    .option('--no-install', 'skip npm install')
+    .action(createResource);
 
   program
-    .command('init')
-    .description('Initialize current folder as FiveM resource OR create new project interactively')
-    .option('-y, --yes', 'Use defaults without prompting', false)
-    .action(async (opts) => {
-      await initCmd(opts);
-    });
-
-  program
-    .command('create <name>')
-    .description('Create a new resource/project from template')
-    .option('-t, --template <name>', 'Template name', 'basic-lua')
-    .option('--ts', 'Use TypeScript for client/server (where applicable)', false)
-    .action(async (name, opts) => {
-      await createCmd(name, opts);
-    });
-
-  program
-    .command('export [path]')
-    .description('Export a resource folder into a FiveM-ready zip (fxmanifest.lua validated)')
-    .option('-o, --out <file>', 'Output zip file path', null)
-    .action(async (resourcePath, opts) => {
-      await exportCmd(resourcePath, opts);
-    });
-
-  program
-    .command('templates')
+    .command('list')
     .description('List available templates')
-    .action(async () => {
-      const { getTemplatesDir } = await import('./utils/templates.js');
-      const dir = await getTemplatesDir();
-      const files = fs.readdirSync(dir, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name);
-      console.log(chalk.cyan('Available templates:'));
-      for (const f of files) console.log(' -', f);
-    });
+    .option('-f, --framework <framework>', 'filter by framework')
+    .action(listTemplates);
 
   program
     .command('install')
-    .description('Install FXP globally on this system')
-    .action(async () => {
-      await installCmd();
-    });
+    .description('Install FXP CLI globally on system')
+    .action(installCLI);
 
   program
     .command('uninstall')
-    .description('Uninstall FXP from this system')
-    .action(async () => {
-      await uninstallCmd();
-    });
+    .description('Uninstall FXP CLI from system')
+    .action(uninstallCLI);
 
   program
     .command('update')
-    .description('Check for updates and update FXP')
-    .option('--check', 'Only check for updates, do not download')
-    .action(async (opts) => {
-      const updateResult = await checkForUpdates(pkg.version);
-      
-      if (updateResult.hasUpdate && !opts.check) {
-        const inquirer = await import('inquirer');
-        const { shouldUpdate } = await inquirer.default.prompt([{
-          type: 'confirm',
-          name: 'shouldUpdate',
-          message: `Update to v${updateResult.latestVersion}?`,
-          default: true
-        }]);
-        
-        if (shouldUpdate) {
-          const { performUpdate } = await import('../scripts/update.js');
-          await performUpdate(updateResult.latestVersion);
-        }
-      }
-    });  if (argv[1] && argv[1].endsWith('fxp.js')) {
-    await program.parseAsync(argv);
-  } else {
-    await program.parseAsync(process.argv);
+    .description('Update FXP CLI to latest version')
+    .option('--force', 'force update even if already latest')
+    .action(updateCLI);
+
+  program
+    .command('help [command]')
+    .description('Display help for command')
+    .action(showHelp);
+
+  // Parse arguments
+  program.parse();
+
+  // Show help if no command provided
+  if (!process.argv.slice(2).length) {
+    program.outputHelp();
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || process.env.FXP_STANDALONE) {
-  // When executed directly
-  main().catch((e) => {
-    console.error(e);
+// Error handling
+process.on('uncaughtException', (error) => {
+  console.error(chalk.red('Uncaught Exception:'), error.message);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error(chalk.red('Unhandled Rejection at:'), promise, chalk.red('reason:'), reason);
+  process.exit(1);
+});
+
+// Start CLI
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(chalk.red('CLI Error:'), error.message);
     process.exit(1);
   });
 }
+
+module.exports = { main };

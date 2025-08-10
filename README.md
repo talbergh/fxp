@@ -1,188 +1,212 @@
-# FXP – FiveM eXperience Pack CLI
+# FXP CLI
 
-**FXP by Talbergh** ist ein modernes Node.js CLI-Tool für FiveM-Modder zum Erstellen, Verwalten und Exportieren von Resources und Projekten.
+**Professional CLI Tool for FiveM & RedM Modders**
+
+[![Version](https://img.shields.io/github/v/release/talbergh/fxp)](https://github.com/talbergh/fxp/releases)
+[![Downloads](https://img.shields.io/github/downloads/talbergh/fxp/total)](https://github.com/talbergh/fxp/releases)
+[![License](https://img.shields.io/github/license/talbergh/fxp)](LICENSE)
+
+FXP is a modern, fast and user-friendly command-line tool designed specifically for FiveM & RedM modders. Create professional resource templates, manage your projects, and streamline your development workflow.
 
 ## 🚀 Features
-- **Interaktive Projekt-Erstellung** mit modernen Templates
-- **Automatisches Update-System** über GitHub Releases
-- **Standalone Binaries** für Windows & Linux (keine Node.js Installation erforderlich)
-- **Moderne FiveM Templates** mit neuesten Natives und Best Practices
-- **NUI Support** mit vorgefertigten Web-Interfaces
-- **Globale Installation** mit install/uninstall Commands
+
+- **📦 Resource Templates** - Pre-built templates for ESX, QB-Core, RedM and more
+- **🎨 Modern NUI** - Beautiful, responsive interfaces with dark theme
+- **🔄 Auto-Updates** - Automatically stays up-to-date via GitHub releases
+- **🌐 Global Install** - Install once, use anywhere on your system
+- **⚡ Fast & Lightweight** - Standalone binary, no Node.js required
+- **🛠️ Framework Support** - ESX, QB-Core, QBox, RedM/RSG compatible
+- **📱 Modern UI** - CEF-optimized interfaces that work perfectly in-game
 
 ## 📦 Installation
 
-### Option 1: Standalone Binary (empfohlen)
-1. Download der neuesten Release von [GitHub Releases](https://github.com/Talbergh/fxp/releases)
-2. Binary an gewünschten Ort kopieren
-3. Global installieren: `fxp install`
+### Quick Install (Recommended)
 
-### Option 2: Node.js (Entwicklung)
+Download the latest binary for your platform from [releases](https://github.com/talbergh/fxp/releases):
+
+**Windows:**
 ```bash
-git clone https://github.com/Talbergh/fxp.git
+# Download fxp-win.exe and run:
+fxp-win.exe install
+```
+
+**Linux:**
+```bash
+# Download fxp-linux and run:
+chmod +x fxp-linux
+./fxp-linux install
+```
+
+### Development Install
+
+```bash
+git clone https://github.com/talbergh/fxp.git
 cd fxp
 npm install
-npm link  # Für globale Nutzung
+npm link
 ```
 
 ## 🎯 Quick Start
 
 ```bash
-# Neues Projekt erstellen
-fxp create my-resource -t modern-lua
+# Create a new ESX shop resource
+fxp create my-shop --template esx-shop
 
-# Vorhandenen Ordner initialisieren
-cd my-existing-folder
-fxp init
+# Create a QB-Core job system
+fxp create taxi-job --template qb-job --framework qb-core
 
-# Resource exportieren
-fxp export . -o my-resource.zip
+# List all available templates
+fxp list
 
-# Verfügbare Templates anzeigen
-fxp templates
-
-# Updates prüfen
-fxp update --check
-
-# Hilfe anzeigen
-fxp --help
-```
-
-## 📋 Commands
-
-| Command | Beschreibung |
-|---------|-------------|
-| `fxp create <name>` | Neue Resource von Template erstellen |
-| `fxp init` | Ordner als FiveM Resource initialisieren |
-| `fxp export [path]` | Resource als ZIP exportieren |
-| `fxp templates` | Verfügbare Templates auflisten |
-| `fxp install` | FXP global installieren |
-| `fxp uninstall` | FXP deinstallieren |
-| `fxp update` | Updates prüfen und installieren |
-
-## 🎨 Templates
-
-### basic-lua
-Minimales Lua-basiertes Template mit:
-- Standard client/server/shared Struktur
-- Moderne fxmanifest.lua
-- Basis-Starter-Code
-
-### modern-lua
-Erweiterte Lua-Resource mit:
-- Lua 5.4 Support
-- ox_lib Integration
-- Moderne FiveM Features
-- Umfangreiche Code-Beispiele
-
-### nui-basic
-NUI-basierte Resource mit:
-- Vollständiges Web-Interface
-- Modern Dark Theme (FiveM-kompatibel)
-- Client/Server NUI-Handler
-- Responsive Design
-
-## 🔧 Development
-
-```bash
-# Dependencies installieren
-npm install
-
-# Development Server
-npm run dev
-
-# Tests ausführen
-npm test
-
-# Build erstellen
-npm run build
-
-# Release erstellen
-npm run release
-```
-
-## 🛠️ Build System
-
-Das erweiterte Build-System unterstützt:
-- **Standalone Binaries** für Windows/Linux
-- **Automatische Asset-Einbettung** (Templates)
-- **Checksums** für Integrität
-- **Build-Informationen** mit Metadaten
-- **Release-Automatisierung** mit Git-Integration
-
-```bash
-# Standard Build
-npm run build
-
-# Development Build (nur Windows)
-npm run build:dev
-
-# Clean Build Artifacts
-npm run clean
-```
-
-## 🔄 Update System
-
-FXP verfügt über ein eingebautes Update-System:
-
-```bash
-# Update-Check
-fxp update --check
-
-# Automatisches Update
+# Update to latest version
 fxp update
 ```
 
-Das System:
-- Prüft GitHub Releases auf neue Versionen
-- Lädt Binaries automatisch herunter
-- Zeigt Changelog und Release-Informationen
-- Unterstützt plattformspezifische Downloads
+## 📋 Available Templates
 
-## 🎯 FiveM Integration
+### FiveM Templates
+- **basic-fivem** - Simple standalone resource
+- **esx-basic** - ESX framework integration
+- **esx-shop** - Complete shop system for ESX
+- **qb-basic** - QB-Core framework integration
+- **qb-job** - Complete job system for QB-Core
+- **ui-nui** - Modern NUI interface template
 
-FXP Templates folgen aktuellen FiveM Best Practices:
-- **lua54** Support aktiviert
-- **Experimental FXv2 OAL** für bessere Performance
-- **ox_lib** Integration wo sinnvoll
-- **Moderne Natives** und APIs
-- **NUI** mit CEF-kompatiblem Styling
-- **Proper Resource Cleanup**
+### RedM Templates
+- **redm-basic** - Basic RedM resource structure
+- **redm-rsg** - RSG framework compatible resource
 
-## 📁 Projektstruktur
+## 🔧 Commands
+
+### Create Resources
+```bash
+fxp create [name] [options]
+
+Options:
+  -t, --template <type>      Template type (basic, esx, qb, etc.)
+  -f, --framework <fw>       Framework (esx, qb-core, standalone)
+  --no-install              Skip npm install
+```
+
+### List Templates
+```bash
+fxp list [options]
+
+Options:
+  -f, --framework <fw>       Filter by framework
+```
+
+### System Management
+```bash
+fxp install                 # Install globally
+fxp uninstall              # Remove from system
+fxp update [--force]       # Update to latest version
+```
+
+### Help
+```bash
+fxp help [command]         # Show help for specific command
+fxp --version              # Show version
+fxp --verbose              # Enable verbose logging
+```
+
+## 🏗️ Project Structure
+
+When you create a resource, FXP generates a clean, professional structure:
+
+```
+my-resource/
+├── fxmanifest.lua         # Resource manifest
+├── config.lua             # Configuration file
+├── client/
+│   └── main.lua           # Client-side scripts
+├── server/
+│   └── main.lua           # Server-side scripts
+├── html/                  # NUI files (if applicable)
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+├── locales/
+│   └── en.json            # Localization files
+└── README.md              # Documentation
+```
+
+## 🎨 Modern UI Guidelines
+
+FXP templates follow modern design principles:
+
+- **Dark Theme** - Optimized for gaming environments
+- **Responsive Design** - Works on all screen resolutions
+- **CEF Compatible** - No unsupported CSS features
+- **Performance Focused** - Minimal resource usage
+- **Accessibility** - Keyboard navigation support
+
+## 🔧 Development
+
+### Building from Source
+
+```bash
+# Clone repository
+git clone https://github.com/talbergh/fxp.git
+cd fxp
+
+# Install dependencies
+npm install
+
+# Development mode
+npm run dev
+
+# Build binaries
+npm run build
+
+# Build specific platform
+npm run build:win     # Windows
+npm run build:linux   # Linux
+```
+
+### Project Structure
 
 ```
 fxp/
-├── bin/fxp.js              # CLI Entry Point
 ├── src/
-│   ├── index.js            # Hauptprogramm
-│   ├── commands/           # CLI Commands
-│   └── utils/              # Hilfsfunktionen
-├── scripts/                # Build & Release Scripts
-├── templates/              # Resource Templates
-│   ├── basic-lua/
-│   ├── modern-lua/
-│   └── nui-basic/
-└── dist/                   # Build Output
+│   ├── commands/          # CLI commands
+│   ├── utils/             # Utility functions
+│   └── index.js           # Main entry point
+├── templates/             # Resource templates
+├── bin/                   # CLI binary wrapper
+├── dist/                  # Built binaries
+└── docs/                  # Documentation
 ```
 
 ## 🤝 Contributing
 
-1. Repository forken
-2. Feature Branch erstellen
-3. Änderungen committen
-4. Pull Request erstellen
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## 📄 License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-MIT License - siehe [LICENSE](LICENSE) für Details.
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/Talbergh/fxp)
-- [Release Notes](https://github.com/Talbergh/fxp/releases)
-- [Issue Tracker](https://github.com/Talbergh/fxp/issues)
+- **Documentation**: [GitHub Wiki](https://github.com/talbergh/fxp/wiki)
+- **Bug Reports**: [GitHub Issues](https://github.com/talbergh/fxp/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/talbergh/fxp/discussions)
+- **Discord**: [FiveM Development Community](https://discord.gg/fivem)
+
+## 🙏 Acknowledgments
+
+- FiveM Community for inspiration and feedback
+- ESX & QB-Core teams for framework integration
+- All contributors who help improve FXP
 
 ---
 
-**FXP by Talbergh** – Modernes Tooling für moderne FiveM Development 🎮
+**Made with ❤️ for the FiveM & RedM community**
+
+*Happy Modding! 🚀*
