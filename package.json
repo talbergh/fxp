@@ -1,0 +1,52 @@
+{
+  "name": "fxp",
+  "version": "0.1.0",
+  "description": "FXP by Talbergh — CLI for FiveM modders to scaffold and export resources/projects.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Talbergh/fxp.git"
+  },
+  "homepage": "https://github.com/Talbergh/fxp",
+  "bugs": {
+    "url": "https://github.com/Talbergh/fxp/issues"
+  },
+  "bin": {
+    "fxp": "bin/fxp.js"
+  },
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node bin/fxp.js",
+    "dev": "node --enable-source-maps bin/fxp.js --help",
+    "build": "node scripts/build.js",
+    "build:standalone": "node scripts/build.js",
+    "build:dev": "node scripts/build.js --dev",
+    "release": "node scripts/release.js",
+    "clean": "node scripts/clean.js",
+    "test": "node scripts/test.js"
+  },
+  "author": "Talbergh",
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^6.0.2",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "inquirer": "^9.3.7",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "scripts": ["bin/fxp.js", "src/**/*.js"],
+    "assets": ["templates/**"],
+    "targets": [
+      "node18-win-x64",
+      "node18-linux-x64"
+    ],
+    "outputPath": "dist"
+  }
+}
